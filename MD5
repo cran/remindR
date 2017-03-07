@@ -1,0 +1,12 @@
+4234aa8828e7dc014b92c98ebdaa6455 *DESCRIPTION
+92e51e60b14aec4ff9ff3f794a960651 *NAMESPACE
+e1363cff444330d618d85b7591bc0e9f *R/remind.R
+ab2b48ada43811ea13414040695d81a8 *R/remindR.R
+2fc4fae01e2de520850c34c1b5d32b52 *R/utilities.R
+fe6eefd7e82dca50b70f85de0bdbd104 *build/vignette.rds
+f4c69c8e0dcd2d52a60f19f03e4a1faf *inst/doc/remindR_vignette.R
+132985cccadfd5dd3c4619a8bff7cdcb *inst/doc/remindR_vignette.Rmd
+45f0c39dd15a12d024a79917f1898426 *inst/doc/remindR_vignette.html
+a460abf324da7e936fdfe75c399b278d *man/remind.Rd
+c45e8c6fcecf1c6cee094a3ffadb17de *man/remindR-package.Rd
+132985cccadfd5dd3c4619a8bff7cdcb *vignettes/remindR_vignette.Rmd

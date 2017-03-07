@@ -1,0 +1,138 @@
+---
+title: "remindR: In Code Text Reminders To Aid Code Development"
+author: "Bert Gunter"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{remindR: In Code Text Reminders To Aid Code Development}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## The Basic Idea
+remindR is a simple package consisting essentially of a single function, `remind()`, that extracts delimited text from commented lines in function source code (when the functions are saved with `options(keep.source = TRUE)` in use). As a slight additional convenience, it also wraps R's existing `comment<-` and `comment` functions so that a "comment" attribute, a character vector of text, can be attached to and extracted from any R object via corresponding `remind<-` and `remind` functions. We discuss how and why this might be useful later.
+
+Why would sticking text reminders into code be useful? The general notion is this: in the course of writing function code, perhaps in collaboration with others, frequently ideas for changes, additions, possible problems, or other concerns will pop up in the course of code writing. I have found that when this happens, I would prefer to make a brief note of the issue, usually in the place where it arises in the code, and then continue working without interrupting my train of thought. Then, at a later time, I can come back and look at the notes and decide what to do about them.
+
+If you are already working in an IDE or version control system that has a suitable form of this capability, then you don't need this package -- you already have what it provides. However, I don't, so I wrote the package to provide it. Here is a little example to show how it works.
+
+Suppose I am writing a function with a data frame argument,"data", and a subset argument, "subset" (e.g. as in `lm`)
+
+    myfunc <- function(x, data, subset, ...){
+    ... some code...
+    ## some comments
+    ... some more code ... ## more comments
+    ...
+    }
+    
+```{r just_code, echo = FALSE}
+    myfunc <- function(x, data, subset, ...){
+    ## some comments
+##    ... some more code ... ## more comments
+   NULL
+    }
+```
+    
+Now, in the midst of merrily rolling along writing my code, I suddenly realize or maybe expose through testing that I have a problem: if my data argument data frame contains any factors for which one or more of its levels disappear due to the subsetting, this will mess up the graphs and tables I'm trying to output. So I add a little reminder at the beginning to do something about this:
+
+    myfunc <- function()(x, data, subset, ...){
+    ## << Need to make sure factors in data are handled properly if levels
+    ## disappear due to subsetting >>
+     
+    ... some code...
+    ## some comments
+    ... some more code ... ## more comments
+    ...
+    }
+    
+```{r first_reminder, echo = FALSE}
+    myfunc <- function(x, data, subset, ...){
+    ## some comments
+    ## << Need to make sure factors in data are handled properly if levels
+    ## disappear due to subsetting >>
+   NULL
+    }
+```
+    
+
+In this example, I've used the default "<<" and ">>" strings as open and close delimiters, but you can use anything you like by specifying it in the `remind` call, which I now use to extract the reminder:
+
+```{r remind_first, comment = ""}
+library(remindR)
+remind(myfunc)
+```
+The `remind` function extracts and returns the delimited reminder as an object of S3 class "reminder", which is then automatically printed by the `print.reminder` function. The delimited reminders can be anywhere in commented lines, not just at the beginning or on lines of their own, although that it is probably the clearest way to insert them.
+
+Now suppose further down in my function as I'm working on a graphical display I want to add another reminder:
+
+    myfunc <- function()(x, data, subset, ...){
+    ## << Need to make sure factors in data are handled properly if levels
+    ## disappear due to subsetting >>
+     
+    ... some code...
+    ## some comments
+    ... some more code ... ## more comments
+    ... more code
+    ## << Consider adding a smoothing option to pass down to the plot call>>
+    ...
+    }
+
+```{r second_reminder, echo = FALSE}
+    myfunc <- function(x, data, subset, ...){
+    ## some comments
+    ## << Need to make sure factors in data are handled properly if levels
+    ## disappear due to subsetting >>
+    ## << Consider adding a smoothing option to pass down to the plot call>>
+   NULL
+    }
+```
+This, then gives:
+```{r remind_second, comment = ""}
+library(remindR)
+remind(myfunc)
+``` 
+Because comments in function code have no fixed syntax, it isn't possible to guarantee correct extraction, and some simple checks are included to warn when there might be a problem. However, with sensible usage, this should never be a problem.
+
+## Reminders as 'Tooltips' or Other Helpful Hints
+
+You can also attach a reminder as the "comment"" attribute of an object. For example, in our previously in-code reminded function:
+```{r fun_attr, comment = ""}
+remind(myfunc) <- "This is something I want to pay attention to"
+
+## Now show all reminders
+
+remind(myfunc)
+```
+
+But this works for any object:
+
+```{r obj_attr, comment = ""}
+x <- runif(5)
+remind(x) <- c("Some boring pseudo-random numbers","and nothing else")
+
+remind(x)
+```
+
+As the Help file for `comment` says: "This is typically useful for data.frames or model fits," e.g. to describe the context, provenance, organization, etc. of the data. Yet another possibility is to use such reminders (in source code or attributes) to provide simple "tooltips" for users. Here is a little example:
+
+```{r tooltip, comment = ""}
+myfunc <- function(x)log(x)
+
+remind(myfunc) <- "Don't forget that the x argument must be all positive
+or you'll get NaN's or -Inf's"
+```
+Now any time a user checks with `remind(myfunc)`, she will be reminded of the argument requirements.
+
+There are at least two use situations where I think this may be handy. The first is when functions are being written either for oneself or a small group of users for whom it may not make sense to create a package with full blown Help files. As anyone who has documented softwre knows, writing good Help files can be a chore, and .Rd documentation files are no different. For one or a few users who are basically knowledgeable about the functions' behavior, providing a few informal tooltips using reminders may suffice.
+
+The other situation is when the function *is* part of and documented in a package. In this case, the idea is that reminders may help avoid certain common errors or provide frequently needed info. Some possibilities are to remind the user to provide a single component list and not a vector for a list argument, noting that an argument is a factor and not to treat it as a character vector, or reminding the user of the exact class or structure of the result. This may help avoid having to wade through lengthy, dense, or even confusing documentation. Alternatively, such reminders might be used to point the user to exactly where to look in the documentation for the relevant information.
+
+A couple of cautions on this, though. First, such simple text notes cannot be considered as in any way an adequate replacement for the proper code documentation required for public use or, more generally, for use by anyone who may not be already familiar with the function behavior. Either good documentation or good user interfaces (or both) are required for this.
+
+Second, as tempting as it may seem, one should probably not add such reminders to existing functions in packages. The reason is that they are part of package namespaces, and namespaces are locked. That means that if you try to do something like `remind(lm) <- "A reminder"`, you now would end up with *two copies* of the `lm` function, one with the reminder in the global environment -- or wherever you called this from -- and one without in the stats package. That strikes me as just asking for trouble!
+
+## Suggestions Welcome
+
+So that's basically it. I suspect that there are other uses for both in code and in attribute reminders that I haven't thought of, and I would be happy to add them to future versions of this vignette (with attribution!) if you let me know about them at bgunter.4567@gmail.com . Any suggestions for improvement are also always welcome, but please keep in mind that if this functionality has any virtue whatever, it is in its simplicity: I am not trying to reproduce .Rd file comprehensiveness or the cleverness of tools in good IDEs or VCSs. 
+
+And of course any other feedback, positive or negative, would be appreciated.

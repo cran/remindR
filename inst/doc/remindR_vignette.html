@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Bert Gunter" />
+
+<meta name="date" content="2017-03-06" />
+
+<title>remindR: In Code Text Reminders To Aid Code Development</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">remindR: In Code Text Reminders To Aid Code Development</h1>
+<h4 class="author"><em>Bert Gunter</em></h4>
+<h4 class="date"><em>2017-03-06</em></h4>
+
+
+
+<div id="the-basic-idea" class="section level2">
+<h2>The Basic Idea</h2>
+<p>remindR is a simple package consisting essentially of a single function, <code>remind()</code>, that extracts delimited text from commented lines in function source code (when the functions are saved with <code>options(keep.source = TRUE)</code> in use). As a slight additional convenience, it also wraps R’s existing <code>comment&lt;-</code> and <code>comment</code> functions so that a “comment” attribute, a character vector of text, can be attached to and extracted from any R object via corresponding <code>remind&lt;-</code> and <code>remind</code> functions. We discuss how and why this might be useful later.</p>
+<p>Why would sticking text reminders into code be useful? The general notion is this: in the course of writing function code, perhaps in collaboration with others, frequently ideas for changes, additions, possible problems, or other concerns will pop up in the course of code writing. I have found that when this happens, I would prefer to make a brief note of the issue, usually in the place where it arises in the code, and then continue working without interrupting my train of thought. Then, at a later time, I can come back and look at the notes and decide what to do about them.</p>
+<p>If you are already working in an IDE or version control system that has a suitable form of this capability, then you don’t need this package – you already have what it provides. However, I don’t, so I wrote the package to provide it. Here is a little example to show how it works.</p>
+<p>Suppose I am writing a function with a data frame argument,“data”, and a subset argument, “subset” (e.g. as in <code>lm</code>)</p>
+<pre><code>myfunc &lt;- function(x, data, subset, ...){
+... some code...
+## some comments
+... some more code ... ## more comments
+...
+}</code></pre>
+<p>Now, in the midst of merrily rolling along writing my code, I suddenly realize or maybe expose through testing that I have a problem: if my data argument data frame contains any factors for which one or more of its levels disappear due to the subsetting, this will mess up the graphs and tables I’m trying to output. So I add a little reminder at the beginning to do something about this:</p>
+<pre><code>myfunc &lt;- function()(x, data, subset, ...){
+## &lt;&lt; Need to make sure factors in data are handled properly if levels
+## disappear due to subsetting &gt;&gt;
+ 
+... some code...
+## some comments
+... some more code ... ## more comments
+...
+}</code></pre>
+<p>In this example, I’ve used the default “&lt;&lt;” and “&gt;&gt;” strings as open and close delimiters, but you can use anything you like by specifying it in the <code>remind</code> call, which I now use to extract the reminder:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(remindR)
+<span class="kw">remind</span>(myfunc)</code></pre></div>
+<pre><code>In function:
+[1] Need to make sure factors in data are handled properly if levels
+ disappear due to subsetting
+ 
+In comment:
+No reminders</code></pre>
+<p>The <code>remind</code> function extracts and returns the delimited reminder as an object of S3 class “reminder”, which is then automatically printed by the <code>print.reminder</code> function. The delimited reminders can be anywhere in commented lines, not just at the beginning or on lines of their own, although that it is probably the clearest way to insert them.</p>
+<p>Now suppose further down in my function as I’m working on a graphical display I want to add another reminder:</p>
+<pre><code>myfunc &lt;- function()(x, data, subset, ...){
+## &lt;&lt; Need to make sure factors in data are handled properly if levels
+## disappear due to subsetting &gt;&gt;
+ 
+... some code...
+## some comments
+... some more code ... ## more comments
+... more code
+## &lt;&lt; Consider adding a smoothing option to pass down to the plot call&gt;&gt;
+...
+}</code></pre>
+<p>This, then gives:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(remindR)
+<span class="kw">remind</span>(myfunc)</code></pre></div>
+<pre><code>In function:
+[1] Need to make sure factors in data are handled properly if levels
+ disappear due to subsetting
+ 
+[2] Consider adding a smoothing option to pass down to the plot call
+ 
+In comment:
+No reminders</code></pre>
+<p>Because comments in function code have no fixed syntax, it isn’t possible to guarantee correct extraction, and some simple checks are included to warn when there might be a problem. However, with sensible usage, this should never be a problem.</p>
+</div>
+<div id="reminders-as-tooltips-or-other-helpful-hints" class="section level2">
+<h2>Reminders as ‘Tooltips’ or Other Helpful Hints</h2>
+<p>You can also attach a reminder as the “comment”&quot; attribute of an object. For example, in our previously in-code reminded function:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">remind</span>(myfunc) &lt;-<span class="st"> &quot;This is something I want to pay attention to&quot;</span>
+
+## Now show all reminders
+
+<span class="kw">remind</span>(myfunc)</code></pre></div>
+<pre><code>In function:
+[1] Need to make sure factors in data are handled properly if levels
+ disappear due to subsetting
+ 
+[2] Consider adding a smoothing option to pass down to the plot call
+ 
+In comment:
+[1] This is something I want to pay attention to
+ </code></pre>
+<p>But this works for any object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">x &lt;-<span class="st"> </span><span class="kw">runif</span>(<span class="dv">5</span>)
+<span class="kw">remind</span>(x) &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Some boring pseudo-random numbers&quot;</span>,<span class="st">&quot;and nothing else&quot;</span>)
+
+<span class="kw">remind</span>(x)</code></pre></div>
+<pre><code>[1] Some boring pseudo-random numbers
+ 
+[2] and nothing else
+ </code></pre>
+<p>As the Help file for <code>comment</code> says: “This is typically useful for data.frames or model fits,” e.g. to describe the context, provenance, organization, etc. of the data. Yet another possibility is to use such reminders (in source code or attributes) to provide simple “tooltips” for users. Here is a little example:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">myfunc &lt;-<span class="st"> </span>function(x)<span class="kw">log</span>(x)
+
+<span class="kw">remind</span>(myfunc) &lt;-<span class="st"> &quot;Don't forget that the x argument must be all positive</span>
+<span class="st">or you'll get NaN's or -Inf's&quot;</span></code></pre></div>
+<p>Now any time a user checks with <code>remind(myfunc)</code>, she will be reminded of the argument requirements.</p>
+<p>There are at least two use situations where I think this may be handy. The first is when functions are being written either for oneself or a small group of users for whom it may not make sense to create a package with full blown Help files. As anyone who has documented softwre knows, writing good Help files can be a chore, and .Rd documentation files are no different. For one or a few users who are basically knowledgeable about the functions’ behavior, providing a few informal tooltips using reminders may suffice.</p>
+<p>The other situation is when the function <em>is</em> part of and documented in a package. In this case, the idea is that reminders may help avoid certain common errors or provide frequently needed info. Some possibilities are to remind the user to provide a single component list and not a vector for a list argument, noting that an argument is a factor and not to treat it as a character vector, or reminding the user of the exact class or structure of the result. This may help avoid having to wade through lengthy, dense, or even confusing documentation. Alternatively, such reminders might be used to point the user to exactly where to look in the documentation for the relevant information.</p>
+<p>A couple of cautions on this, though. First, such simple text notes cannot be considered as in any way an adequate replacement for the proper code documentation required for public use or, more generally, for use by anyone who may not be already familiar with the function behavior. Either good documentation or good user interfaces (or both) are required for this.</p>
+<p>Second, as tempting as it may seem, one should probably not add such reminders to existing functions in packages. The reason is that they are part of package namespaces, and namespaces are locked. That means that if you try to do something like <code>remind(lm) &lt;- &quot;A reminder&quot;</code>, you now would end up with <em>two copies</em> of the <code>lm</code> function, one with the reminder in the global environment – or wherever you called this from – and one without in the stats package. That strikes me as just asking for trouble!</p>
+</div>
+<div id="suggestions-welcome" class="section level2">
+<h2>Suggestions Welcome</h2>
+<p>So that’s basically it. I suspect that there are other uses for both in code and in attribute reminders that I haven’t thought of, and I would be happy to add them to future versions of this vignette (with attribution!) if you let me know about them at <a href="mailto:bgunter.4567@gmail.com">bgunter.4567@gmail.com</a> . Any suggestions for improvement are also always welcome, but please keep in mind that if this functionality has any virtue whatever, it is in its simplicity: I am not trying to reproduce .Rd file comprehensiveness or the cleverness of tools in good IDEs or VCSs.</p>
+<p>And of course any other feedback, positive or negative, would be appreciated.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

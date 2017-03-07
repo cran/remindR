@@ -1,0 +1,7 @@
+export("remind<-")
+export(remind)
+importFrom(assertthat, assert_that, is.string)
+S3method(print,reminder)
+S3method(remind,default)
+S3method(remind,"function")
+
